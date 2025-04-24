@@ -25,10 +25,7 @@ public class Menu {
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline
         if (choice == 1) {
-            System.out.println("Choose your team: 1) Plumber 2) Saboteur");
-            int teamChoice = scanner.nextInt();
-            scanner.nextLine();
-            gameManager.startGame(teamChoice);
+            gameManager.startGame(); // Start game directly, saboteur goes first
         } else if (choice == 2) {
             gameManager.exitGame();
         } else {

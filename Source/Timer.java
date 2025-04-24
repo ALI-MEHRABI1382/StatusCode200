@@ -1,9 +1,33 @@
 public class Timer {
-    private int totalTime;     // Total game duration (Analysis 4.3.12)
-    private int timeRemaining; // Time left (Analysis 4.3.12)
+    private int totalTime;
+    private int timeRemaining;
+    private GameManager gameManager;
 
-    public void startCountdown() {}
-    public void endGame() {}
-    public boolean isTimeUp() { return timeRemaining <= 0; }
-    public int getTimeRemaining() { return timeRemaining; }
+    public Timer(GameManager gm) {
+        this.totalTime = 20; // for example, 20 turns
+        this.timeRemaining = totalTime;
+        this.gameManager = gm;
+    }
+
+    public void startCountdown() {
+        timeRemaining--;
+        if (isTimeUp()) {
+            endGame();
+        }
+    }
+
+    public void endGame() {
+        System.out.println("Time is up!");
+        gameManager.determineWinner(); // 🔗 now you can call this
+        gameManager.exitGame();
+    }
+
+    public boolean isTimeUp() {
+        return timeRemaining <= 0;
+    }
+
+    public int getTimeRemaining() {
+        return timeRemaining;
+    }
 }
+

@@ -15,7 +15,7 @@ public class GameManager {
     public GameManager() {
         players = new ArrayList<>();
         activeElements = new ArrayList<>();
-        timer = new Timer();
+        timer = new Timer(this);
         menu = new Menu(this); // Menu needs GameManager reference
     }
     public Menu getMenu() { return menu; }
@@ -93,69 +93,127 @@ public class GameManager {
     }
 
     // Handles pipe actions
-    public void handlePipeAction(int choice) {
-        Pipe pipe = new Pipe();
-        currentPlayer.move(pipe);
-        if (currentPlayer instanceof Plumber) {
-            Plumber p = (Plumber) currentPlayer;
-            switch (choice) {
-                case 1: p.fixLeakingPipe(pipe); switchPlayer(); playTurn(); break;
-                case 2: switchPlayer(); playTurn(); break;
-                default: System.out.println("Invalid option, try again."); playTurn();
-            }
-        } else {
-            Saboteur s = (Saboteur) currentPlayer;
-            switch (choice) {
-                case 1: s.puncturePipe(pipe); switchPlayer(); playTurn(); break;
-                case 2: switchPlayer(); playTurn(); break;
-                default: System.out.println("Invalid option, try again."); playTurn();
-            }
-        }
-    }
-
-    // Handles pump actions
-    public void handlePumpAction(int choice) {
-        Pump pump = new Pump();
-        currentPlayer.move(pump);
-        if (currentPlayer instanceof Plumber) {
-            Plumber p = (Plumber) currentPlayer;
-            switch (choice) {
-                case 1: p.fixBrokenPump(pump); switchPlayer(); playTurn(); break;
-                case 2: p.extendPipeSystem(new EndOfPipe(), pump); switchPlayer(); playTurn(); break;
-                case 3: switchPlayer(); playTurn(); break;
-                default: System.out.println("Invalid option, try again."); playTurn();
-            }
-        } else {
-            Saboteur s = (Saboteur) currentPlayer;
-            switch (choice) {
-                case 1: s.changePumpDirection(pump); switchPlayer(); playTurn(); break;
-                case 2: switchPlayer(); playTurn(); break;
-                default: System.out.println("Invalid option, try again."); playTurn();
-            }
-        }
-    }
-
-    // Handles cistern actions (Plumber only)
-    public void handleCisternAction(int choice) {
-        Cistern cistern = new Cistern();
-        currentPlayer.move(cistern);
+  // Handles pipe actions
+public void handlePipeAction(int choice) {
+    Pipe pipe = new Pipe();
+    currentPlayer.move(pipe);
+    if (currentPlayer instanceof Plumber) {
         Plumber p = (Plumber) currentPlayer;
         switch (choice) {
-            case 1: p.pickUpNewPipe(); switchPlayer(); playTurn(); break;
-            case 2: p.pickUpNewPump(); switchPlayer(); playTurn(); break;
-            case 3: switchPlayer(); playTurn(); break;
-            default: System.out.println("Invalid option, try again."); playTurn();
+            case 1: 
+                p.fixLeakingPipe(pipe); 
+                switchPlayer(); 
+                playTurn(); 
+                break;
+            case 2: 
+                exitGame(); // Exit program instead of switching player
+                break;
+            default: 
+                System.out.println("Invalid option, try again."); 
+                playTurn();
+        }
+    } else {
+        Saboteur s = (Saboteur) currentPlayer;
+        switch (choice) {
+            case 1: 
+                s.puncturePipe(pipe); 
+                switchPlayer(); 
+                playTurn(); 
+                break;
+            case 2: 
+                exitGame(); // Exit program instead of switching player
+                break;
+            default: 
+                System.out.println("Invalid option, try again."); 
+                playTurn();
         }
     }
+}
+
+// Handles pump actions
+public void handlePumpAction(int choice) {
+    Pump pump = new Pump();
+    currentPlayer.move(pump);
+    if (currentPlayer instanceof Plumber) {
+        Plumber p = (Plumber) currentPlayer;
+        switch (choice) {
+            case 1: 
+                p.fixBrokenPump(pump); 
+                switchPlayer(); 
+                playTurn(); 
+                break;
+            case 2: 
+                p.extendPipeSystem(new EndOfPipe(), pump); 
+                switchPlayer(); 
+                playTurn(); 
+                break;
+            case 3: 
+                exitGame(); // Exit program instead of switching player
+                break;
+            default: 
+                System.out.println("Invalid option, try again."); 
+                playTurn();
+        }
+    } else {
+        Saboteur s = (Saboteur) currentPlayer;
+        switch (choice) {
+            case 1: 
+                s.changePumpDirection(pump); 
+                switchPlayer(); 
+                playTurn(); 
+                break;
+            case 2: 
+                exitGame(); // Exit program instead of switching player
+                break;
+            default: 
+                System.out.println("Invalid option, try again."); 
+                playTurn();
+        }
+    }
+}
+
+// Handles cistern actions (Plumber only)
+public void handleCisternAction(int choice) {
+    Cistern cistern = new Cistern();
+    currentPlayer.move(cistern);
+    Plumber p = (Plumber) currentPlayer;
+    switch (choice) {
+        case 1: 
+            p.pickUpNewPipe(); 
+            switchPlayer(); 
+            playTurn(); 
+            break;
+        case 2: 
+            p.pickUpNewPump(); 
+            switchPlayer(); 
+            playTurn(); 
+            break;
+        case 3: 
+            exitGame(); // Exit program instead of switching player
+            break;
+        default: 
+            System.out.println("Invalid option, try again."); 
+            playTurn();
+    }
+}
 
     // Switches to the next player
-    public void switchPlayer() {
-        if (currentPlayer instanceof Plumber) {
-            currentPlayer = saboteur;
-        } else {
-            currentPlayer = plumber;
-        }
+    // Switches to the next player
+public void switchPlayer() {
+    if (currentPlayer instanceof Plumber) {
+        currentPlayer = saboteur;
+    } else {
+        currentPlayer = plumber;
     }
+
+    // ⏳ Count down the turn-based timer
+    timer.startCountdown();
+    if (timer.isTimeUp()) {
+        determineWinner();
+        exitGame();
+    }
+}
+
 
     // Exits the game
     public void exitGame() {
@@ -172,4 +230,16 @@ public class GameManager {
     public void calculateWaterDeliveredAndLost() {}
     public void setupPipeSystem() {}
     public void ensureTeamsHaveMinimumPlayers() {}
+
+    public void startGame() {
+        plumber = new Plumber();
+        saboteur = new Saboteur();
+        players.add(plumber);
+        players.add(saboteur);
+    
+        // Saboteur always starts first
+        currentPlayer = saboteur;
+        System.out.println("Saboteur starts the game!");
+        playTurn(); // Start the first turn
+    }
 }
