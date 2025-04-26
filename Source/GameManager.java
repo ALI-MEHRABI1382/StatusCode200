@@ -11,6 +11,7 @@ public class GameManager {
     private Plumber plumber;            // Plumber instance
     private Saboteur saboteur;          // Saboteur instance
     private Menu menu;                  // Reference to Menu for UI calls
+    private List<Pipe> pipes = new ArrayList<>();
 
     public GameManager() {
         players = new ArrayList<>();
@@ -42,6 +43,7 @@ public class GameManager {
     private void playTurn() {
         int choice = menu.showPlayerMenu(currentPlayer);
         handlePlayerTurn(choice);
+
     }
 
     // Handles the current player's turn based on menu choice
@@ -212,6 +214,8 @@ public void switchPlayer() {
         determineWinner();
         exitGame();
     }
+
+    simulateWaterFlow();
 }
 
 
@@ -223,11 +227,44 @@ public void switchPlayer() {
 
     public Player getCurrentPlayer() { return currentPlayer; }
     public List<Player> getPlayers() { return players; }
-    public void simulateWaterFlow() {}
+    public void simulateWaterFlow() {
+        
+        for (ActiveElement ae : activeElements) {
+            if (ae instanceof Spring spring && spring.outgoingPipe != null) {
+                double generated = spring.generateWater();
+                 
+                spring.outgoingPipe.transferWater(generated, this); // ✅ pass GameManager reference
+            }
+        }
+    
+        for (ActiveElement ae : activeElements) {
+            if (ae instanceof Pump pump) {
+                pump.transferWater(this); // ✅ pass GameManager reference
+            }
+        }
+    
+        calculateWaterDeliveredAndLost();
+
+        System.out.println("Water delivered so far: " + waterDelivered);
+        System.out.println("Water lost so far: " + waterLost);
+
+    }
+    
+
+    public void addLostWater(double amount) {
+        waterLost += amount;
+    }
     public void determineWinner() {}
     public void handlePumpMalfunctions() {}
     public void monitorPipeSystem() {}
-    public void calculateWaterDeliveredAndLost() {}
+    public void calculateWaterDeliveredAndLost() {
+        waterDelivered = 0;
+        for (ActiveElement ae : activeElements) {
+            if (ae instanceof Cistern cistern) {
+                waterDelivered += cistern.getStoredWater(); // you may need to write this getter
+            }
+        }
+    }
     public void setupPipeSystem() {}
     public void ensureTeamsHaveMinimumPlayers() {}
 
@@ -237,9 +274,58 @@ public void switchPlayer() {
         players.add(plumber);
         players.add(saboteur);
     
-        // Saboteur always starts first
         currentPlayer = saboteur;
         System.out.println("Saboteur starts the game!");
-        playTurn(); // Start the first turn
+    
+        // TEMP: Run 3 turns of water flow test
+        setupTestNetwork();
+        simulateWaterFlow();
+        simulateWaterFlow();
+        simulateWaterFlow();
+    
+        System.out.println("Water flow test complete.\n");
+    
+        // CONTINUE normal game loop
+        playTurn();
     }
+    
+
+
+
+    //Additional Classes (Not in The Documnetations )
+    public void setupTestNetwork() {
+        Spring spring = new Spring();
+        Pump pump = new Pump();
+        Cistern cistern = new Cistern();
+        Pipe pipe1 = new Pipe();
+        Pipe pipe2 = new Pipe();
+    
+        // Set up outgoing/incoming pipes
+        spring.outgoingPipe = pipe1;
+        pump.incomingPipe = pipe1;
+        pump.outgoingPipe = pipe2;
+    
+        pipe1.setLeaking(false); // Ensure no leak
+        pipe2.setLeaking(false);
+    
+        // Simulate connections (simplified)
+        EndOfPipe pipe1End = new EndOfPipe();
+        EndOfPipe pipe2End = new EndOfPipe();
+    
+        // Connect pipe ends to elements (manual stubbing)
+        pipe1End.connect(pump); // pipe1 ends at pump
+        pipe2End.connect(cistern); // pipe2 ends at cistern
+    
+        // Link end objects to pipes
+        pipe1.endEnd = pipe1End;
+        pipe2.endEnd = pipe2End;
+    
+        // Register all elements to the game
+        activeElements.add(spring);
+        activeElements.add(pump);
+        activeElements.add(cistern);
+        pipes.add(pipe1);
+        pipes.add(pipe2);
+    }
+    
 }

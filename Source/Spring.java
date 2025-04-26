@@ -1,5 +1,5 @@
 public class Spring extends ActiveElement {
-    private double waterOutputRate; // Rate of water generation (Analysis 4.3.9)
+    private double waterOutputRate = 10.0; // units per turn
 
     public Spring() { type = "spring"; }
 

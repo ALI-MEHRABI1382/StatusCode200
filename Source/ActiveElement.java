@@ -1,6 +1,7 @@
-import java.nio.channels.Pipe;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ActiveElement extends Element{
     protected String type;           // Differentiates spring, pump, cistern (Analysis 4.3.8)

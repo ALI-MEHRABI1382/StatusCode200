@@ -4,7 +4,7 @@ public class Timer {
     private GameManager gameManager;
 
     public Timer(GameManager gm) {
-        this.totalTime = 20; // for example, 20 turns
+        this.totalTime = 300; // for example, 20 turns
         this.timeRemaining = totalTime;
         this.gameManager = gm;
     }

@@ -13,7 +13,14 @@ public class Cistern extends ActiveElement {
         pumpInventory = new ArrayList<>();
     }
 
-    public void storeWater(double amount) {}
+    public void storeWater(double amount) {
+        storedWater += amount;
+    }
+
+    public double getStoredWater() {
+        return storedWater;
+    }
+    
     public Pipe manufacturePipe() { return new Pipe(); }
     public Pump manufacturePump() { return new Pump(); }
 }

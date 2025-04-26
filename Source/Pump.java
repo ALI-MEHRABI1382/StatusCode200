@@ -1,8 +1,11 @@
 public class Pump extends ActiveElement {
-    private Pipe incomingPipe;  // Input pipe (Analysis 4.3.6)
-    private Pipe outgoingPipe;  // Output pipe (Analysis 4.3.6)
+    protected Pipe incomingPipe;  // Input pipe (Analysis 4.3.6)
+    protected Pipe outgoingPipe;  // Output pipe (Analysis 4.3.6)
     private Reservoir reservoir;// Temporary storage (Analysis 4.3.6)
-
+    public Reservoir getReservoir() {
+        return reservoir;
+    }
+    
     // Initializes pump with reservoir (Analysis 4.1.3)
     public Pump() {
         type = "pump";
@@ -11,9 +14,20 @@ public class Pump extends ActiveElement {
     }
 
     // Simulates water transfer (Planning 5.1.2.12)
-    public void transferWater() {
-        // Placeholder for water flow logic
+    public void transferWater(GameManager gm) {
+        if (!isOperational || incomingPipe == null || outgoingPipe == null) return;
+    
+        incomingPipe.transferWater(gm);// ✅ call the helper method with default amount
+    
+        reservoir.storeWater(10); // store a fixed amount
+    
+        if (!outgoingPipe.isLeaking()) {
+            outgoingPipe.transferWater(reservoir.releaseWater(), gm); // ✅ correct method
+        } else {
+            gm.addLostWater(reservoir.releaseWater());
+        }
     }
+    
 
     // Breaks pump (Planning 5.2.7)
     public void breakDown() { 
