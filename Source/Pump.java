@@ -1,51 +1,67 @@
 public class Pump extends ActiveElement {
-    protected Pipe incomingPipe;  // Input pipe (Analysis 4.3.6)
-    protected Pipe outgoingPipe;  // Output pipe (Analysis 4.3.6)
-    private Reservoir reservoir;// Temporary storage (Analysis 4.3.6)
-    public Reservoir getReservoir() {
-        return reservoir;
-    }
-    
-    // Initializes pump with reservoir (Analysis 4.1.3)
+    protected Pipe incomingPipe;
+    protected Pipe outgoingPipe;
+    private Reservoir reservoir;
+
+    private static int idCounter = 1;
+    private int id;
+
     public Pump() {
         type = "pump";
         reservoir = new Reservoir();
-        isOperational = true; // Pump starts operational
+        isOperational = true;
+        this.id = idCounter++;
     }
 
-    // Simulates water transfer (Planning 5.1.2.12)
+    public int getId() {
+        return id;
+    }
+
+    public Reservoir getReservoir() {
+        return reservoir;
+    }
+
     public void transferWater(GameManager gm) {
-        if (!isOperational || incomingPipe == null || outgoingPipe == null) return;
-    
-        incomingPipe.transferWater(gm);// ✅ call the helper method with default amount
-    
-        reservoir.storeWater(10); // store a fixed amount
-    
-        if (!outgoingPipe.isLeaking()) {
-            outgoingPipe.transferWater(reservoir.releaseWater(), gm); // ✅ correct method
+        System.out.println("DEBUG: Pump#1 starting transfer cycle.");
+
+        if (!isOperational || incomingPipe == null || outgoingPipe == null) {
+            System.out.println("DEBUG: Pump#1 not operational or disconnected. Skipping transfer.");
+            return;
+        }
+
+        incomingPipe.transferWater(gm);
+
+        if (!outgoingPipe.isLeaking() && outgoingPipe != null) {
+            double waterToSend = reservoir.releaseWater("Pump#1");
+            outgoingPipe.transferWater(waterToSend, gm);
+            System.out.println("DEBUG: Pump#1 working - pushed " + waterToSend + " units through outgoing pipe.");
         } else {
-            gm.addLostWater(reservoir.releaseWater());
+            double generated = 10;
+            double excess = reservoir.storeWaterAndReturnExcess(generated, "Pump#1");
+            if (excess > 0) {
+                gm.addLostWater(excess);
+                System.out.println("DEBUG: Pump#1 stored water but Reservoir overflowed! Lost " + excess + " units.");
+            } else {
+                System.out.println("DEBUG: Pump#1 stored " + generated + " units in Reservoir.");
+            }
         }
     }
-    
 
-    // Breaks pump (Planning 5.2.7)
-    public void breakDown() { 
-        isOperational = false; 
+    public void breakDown() {
+        isOperational = false;
     }
 
-    // Repairs pump (Planning 5.2.8)
-    public void repair() { 
-        isOperational = true; 
+    public void repair() {
+        isOperational = true;
         System.out.println("The pump has been fixed successfully.");
     }
 
-    // Changes pump direction (Planning 5.2.7)
-    public void changeDirection() { 
-        // Swap incoming and outgoing pipes (skeletal implementation)
+    public void changeDirection() {
         Pipe temp = incomingPipe;
         incomingPipe = outgoingPipe;
         outgoingPipe = temp;
-        System.out.println("The pump direction has been changed successfully.");
+
+        isOperational = false;
+        System.out.println("Pump direction changed and now requires repair!");
     }
 }

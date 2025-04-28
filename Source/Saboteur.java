@@ -3,7 +3,7 @@ public class Saboteur extends Player {
 
     // Punctures pipe, causes leak (Planning 5.2.5)
     public void puncturePipe(Pipe pipe) { 
-       // pipe.isLeaking = true; // Set leaking state
+        pipe.setLeaking(true); // ✅ Mark the pipe as leaking!
         System.out.println("Pipe punctured, now leaking.");
     }
     public void changePumpDirection(Pump pump) { pump.changeDirection(); }

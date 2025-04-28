@@ -96,41 +96,44 @@ public class GameManager {
 
     // Handles pipe actions
   // Handles pipe actions
-public void handlePipeAction(int choice) {
-    Pipe pipe = new Pipe();
+  public void handlePipeAction(int choice) {
+    // ⚡ Instead of creating new pipe, pick one from pipes list
+    Pipe pipe = pipes.get(0); // Always select pipe1 for now
     currentPlayer.move(pipe);
+
     if (currentPlayer instanceof Plumber) {
         Plumber p = (Plumber) currentPlayer;
         switch (choice) {
-            case 1: 
-                p.fixLeakingPipe(pipe); 
-                switchPlayer(); 
-                playTurn(); 
+            case 1:
+                p.fixLeakingPipe(pipe);
+                switchPlayer();
+                playTurn();
                 break;
-            case 2: 
-                exitGame(); // Exit program instead of switching player
+            case 2:
+                exitGame();
                 break;
-            default: 
-                System.out.println("Invalid option, try again."); 
+            default:
+                System.out.println("Invalid option, try again.");
                 playTurn();
         }
     } else {
         Saboteur s = (Saboteur) currentPlayer;
         switch (choice) {
-            case 1: 
-                s.puncturePipe(pipe); 
-                switchPlayer(); 
-                playTurn(); 
+            case 1:
+                s.puncturePipe(pipe);
+                switchPlayer();
+                playTurn();
                 break;
-            case 2: 
-                exitGame(); // Exit program instead of switching player
+            case 2:
+                exitGame();
                 break;
-            default: 
-                System.out.println("Invalid option, try again."); 
+            default:
+                System.out.println("Invalid option, try again.");
                 playTurn();
         }
     }
 }
+
 
 // Handles pump actions
 public void handlePumpAction(int choice) {
@@ -305,27 +308,39 @@ public void switchPlayer() {
         pump.incomingPipe = pipe1;
         pump.outgoingPipe = pipe2;
     
-        pipe1.setLeaking(false); // Ensure no leak
+        // Ensure pipes are not leaking
+        pipe1.setLeaking(false);
         pipe2.setLeaking(false);
     
-        // Simulate connections (simplified)
+        // Create EndOfPipe for both start and end of each pipe
+        EndOfPipe pipe1Start = new EndOfPipe();
         EndOfPipe pipe1End = new EndOfPipe();
+        EndOfPipe pipe2Start = new EndOfPipe();
         EndOfPipe pipe2End = new EndOfPipe();
     
-        // Connect pipe ends to elements (manual stubbing)
-        pipe1End.connect(pump); // pipe1 ends at pump
-        pipe2End.connect(cistern); // pipe2 ends at cistern
+        // Connect ends properly
+        pipe1End.connect(pump);        // pipe1 ends at pump
+        pipe2End.connect(cistern);     // pipe2 ends at cistern
+        pipe1Start.connect(spring);    // pipe1 starts from spring
+        pipe2Start.connect(pump);      // pipe2 starts from pump
     
-        // Link end objects to pipes
+        // Attach ends to pipes
+        pipe1.startEnd = pipe1Start;
         pipe1.endEnd = pipe1End;
+        pipe2.startEnd = pipe2Start;
         pipe2.endEnd = pipe2End;
     
-        // Register all elements to the game
+        // Register only ActiveElements (not pipes) into activeElements
         activeElements.add(spring);
         activeElements.add(pump);
         activeElements.add(cistern);
+    
+        // If you want to track pipes separately, add them to pipes list
         pipes.add(pipe1);
         pipes.add(pipe2);
+    
+        System.out.println("✅ Test network successfully set up!");
     }
+    
     
 }
